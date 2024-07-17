@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <%- include('../partials/head'); %>
+    <link rel="stylesheet" href="css/style.css" type="text/css">
+    <link rel="icon" type="image/x-icon" href="/img/myFavicon.jpg">
+</head>
+
+<body>
+    <header>
+        <%- include('../partials/header') %>
+    </header>
+
+    <%# スライドショー表示時間 %>
+    <p>表示時間を選んでください。</p>
+    <% 
+        let displayTimeNum = 3;        // e.g., if it 3, display times are 10, 20, 30.
+        let displayTimeInterval = 10;   /* sec */
+        let displayTimeMin = 10;        /* sec */
+        let displayTimeArray = [];
+        for (let i=0; i <= displayTimeNum-1; i++) {
+            displayTime = displayTimeMin + i*displayTimeInterval;
+            displayTimeArray.push(displayTime);
+        }
+    %>
+    <% for (let i=0; i<=displayTimeArray.length-1; i++) { %>  
+    <label>
+        <% if (i == 0) { %>
+            <input type="radio" name="displayTime" checked/>
+        <% } else { %>
+            <input type="radio" name="displayTime"/>
+        <% } %>
+        <%= displayTimeArray[i] %>秒
+    <% } %>
+
+    <%# =========== カテゴリ一覧 =========== %>
+    <% let categoryNameArray = [
+        // この配列は外部ファイルにした方がいいかもしれない
+        '青果', '鮮魚・寿司', '惣菜', '酒・飲料', 'グロサリー', '衣料用品', 
+        '生活消耗品', '台所用品', 'メンズビューティ', '季節雑貨', 'ホールセールパン',
+        '加工肉', '冷凍食品', '洋日配', '和日配', '事務所', '決済エリア', '菓子', 
+        'ハード', '米'
+    ] %>
+    <p>カテゴリ一覧</p>
+    <%for (let i = 0; i < categoryNameArray.length; i++) {%>
+    <label>
+        <input type="checkbox" name="category-name"/>
+        <%= categoryNameArray[i] %>
+    </label><br>
+    <% } %>
+
+
+
+    <%# =========== 店舗一覧 =========== %>
+    <% let storeNameArray = [
+        '北九州空港ﾊﾞｲﾊﾟｽ', '上津役', '和白', '上三緒', '長沼', '粕屋', 
+        '福岡空港', '八千代', '水巻', '田川後藤寺', '稲築', '春日公園', 
+        '池尻', 'アイランドシティ', '成田', '須恵', '今宿', '曰佐', '大野城まどかぴあ前', 
+        '宮田', '筑紫野', '中間', '脇田', '原田1丁目', '戸畑小芝', '今泉2丁目', 
+        '下曽根駅南', '藤崎駅前', '片縄9丁目', '塩原3丁目', '多の津', '比恵町', '志免南里', 
+        '浪岡', '常盤', '芦屋山鹿', '習志野大久保', '戸畑一枝', '篠栗尾仲',
+        '飯塚幸袋', '下関生野', '麦野', '宮若福丸', '八幡東田', '鞍手', 'つくば学園都市', 
+        '前橋日吉町2丁目', '島原', 'IoTラボ', '街北'
+    ] %>
+    <form action="#" method="post">
+        <select name="store-name" id="selectStoreName">
+            <option value="" disabled selected style="display:none;">選択してください</option> 
+            <% for (let i=0; i<storeNameArray.length; i++) { %>
+                <option><%= storeNameArray[i] %></option>
+            <% } %>
+        </select>
+        <button type="submit">送信</button>
+    </form>
+
+
+
+    <p><a href="index">Exit</a></p>
+    
+    <%# ============== SCRIPT ============== %>
+    <script>
+        var select = document.getElementById('selectStoreName');
+        select.onchange = function(){
+            console.log(this.value);
+        }
+    </script>
+</body>
+
+</html>

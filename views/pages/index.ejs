@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <%- include('../partials/head'); %>
+        <link rel="stylesheet" href="css/style.css" type="text/css">
+        <link rel="icon" type="image/x-icon" href="/img/myFavicon.jpg">
+</head>
+
+<body>
+
+    <header>
+        <%- include('../partials/header') %>
+    </header>
+    <form action="/" method="POST" id="form" class="container">
+
+        <h2>ログインフォーム</h2>
+        <label><b>メールアドレス</b>
+            <input id="mailAddress" type="text" placeholder="メールアドレスを入力" name="mailAddress" required>
+        </label>
+
+        <label><b>パスワード</b>
+            <input id="password" type="password" name="password" placeholder="パスワードを入力"><br>
+        </label>
+
+        <button type="submit" class="btn">ログイン</button>
+
+        <div id="errorMessage" style="color: red; "></div>
+    </form>
+
+    <script src="/js/signIn.js"></script>
+    </div>
+</body>
+
+</html>
