@@ -4,13 +4,13 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 const mysql = require('mysql');
+const categories = require('./categories');
+const storeNames = require('./storeNames'); // 店舗名データをインポート
 var app = express();
 
 /* ========== CONSTANTS ========== */
 const PORT = config.port;
 const TABLE_NAME = 'users';
-const SEC_TO_MSEC = 1000    /* msec */;
-const MIN_TO_MSEC = 60000   /* msec */;
 const TOKEN_RETENTION_TIME = 6e4; /* msec */
 
 /* =========== GLOBAL VARIABLES ========== */
@@ -48,7 +48,7 @@ app.get('/stationary', (req, res) => {
     console.log("Sign-in is successed: ", isSignIn);
     if (isSignIn == 1) {
         setTimeout(() => { isSignIn = 0 }, TOKEN_RETENTION_TIME); // Token is expired
-        res.render('pages/stationary');
+        res.render('pages/stationary', { categories, storeNames });
     } else {
         res.redirect('/'); 
     }
