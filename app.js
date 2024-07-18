@@ -9,7 +9,9 @@ var app = express();
 /* ========== CONSTANTS ========== */
 const PORT = config.port;
 const TABLE_NAME = 'users';
-const TOKEN_RETENTION_TIME = 60000;     /* msec */
+const SEC_TO_MSEC = 1000    /* msec */;
+const MIN_TO_MSEC = 60000   /* msec */;
+const TOKEN_RETENTION_TIME = 6e4; /* msec */
 
 /* =========== GLOBAL VARIABLES ========== */
 isSignIn = 0;      // => 1: sign-in is succsessed!
@@ -45,8 +47,10 @@ app.get('/', function (req, res) { res.render('pages/index'); });
 app.get('/stationary', (req, res) => { 
     console.log("Sign-in is successed: ", isSignIn);
     if (isSignIn == 1) {
-        setTimeout(isSignIn = 0, TOKEN_RETENTION_TIME); // Token is expired
-        res.render('pages/stationary'); 
+        setTimeout(() => { isSignIn = 0 }, TOKEN_RETENTION_TIME); // Token is expired
+        res.render('pages/stationary');
+    } else {
+        res.redirect('/'); 
     }
 
     console.log(req.body);
@@ -54,11 +58,7 @@ app.get('/stationary', (req, res) => {
 });
 
 app.get('/index', (req, res) => { 
-    console.log("Sign-in is successed: ", isSignIn);
-    if (isSignIn == 1) {
-        setTimeout(isSignIn = 0, TOKEN_RETENTION_TIME); // Token is expired
-        res.render('pages/index'); 
-    }
+    res.render('pages/index'); 
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -84,17 +84,26 @@ app.post('/', async (req, res) => {
             isSignIn = 1;   // for sign-in
             console.log("Sign-in is successed: ", isSignIn);
             console.log("Authorized");
-            res.render('pages/stationary');   
+            res.redirect('/stationary');
+            //res.render('pages/stationary');   
         }
     })
     
 })
 
-// posted selector
-app.post('/stationary', (req, res) => {
-    const selectedStore = req.body['store-name'];
-    console.log(`選択された店舗: ${selectedStore}`);
-    res.send(`選択された店舗は: ${selectedStore}`);
+// posted from stationary
+app.post('/updateImage', (req, res) => {
+    const selectedStores = req.body.selectedStores;
+    const selectedCategories = req.body.selectedCategories;
+    console.log('Selected stores:', selectedStores);
+    console.log('Selected categories:', selectedCategories);
+
+    // insert data to database
+
+
+
+
+    res.status(200).send('Selection updated');
 });
 
 /* ========== LISTEN ========== */
