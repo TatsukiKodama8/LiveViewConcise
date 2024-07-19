@@ -2,27 +2,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectElement = document.getElementById('selectStoreName');
     const btnas = document.getElementById('buttonAllSelect');
     const btnac = document.getElementById('buttonAllCancellation');
+    const categoryForm = document.getElementById('categoryForm');
 
-    // if check 青果, 惣菜, then we have an array [青果, 惣菜]
     function getSelectedCategories() {
-        const categoryForm = document.getElementById('categoryForm');
         return Array.from(categoryForm.querySelectorAll('input[name="category-name"]:checked'))
                     .map(input => input.value);
     }
 
-    // post categoryNameArray and storeNameArray to server
-    function postSelection(options) {
-        const selectedOptions = Array.from(options)
+    // POST: => e.g., 
+    // Selected stores: ['上津役', '上三緒', '福岡空港', '田川後藤寺']
+    // Selected categories: [ '鮮魚・寿司', 'グロサリー', '季節雑貨', '洋日配' ]
+    function postSelection() {
+        const selectedStores = Array.from(selectElement.options)
                                     .filter(option => option.selected)
                                     .map(option => option.value);
-        console.log(selectedOptions);
+        const selectedCategories = getSelectedCategories();
 
         fetch('/updateImage', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ selectedStores: selectedOptions, selectedCategories: getSelectedCategories() })
+            body: JSON.stringify({ selectedStores, selectedCategories })
         }).then(response => {
             if (response.ok) {
                 console.log('Selection updated');
@@ -48,22 +49,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const option = e.target;
         if (option.tagName === 'OPTION') {
             option.selected = !option.selected;
-            postSelection(selectElement.options);
+            postSelection();
             displaySelectedOptions();
         }
     });
 
-    // all selection when button is cllicked
+    // all selection and is post when button is clicked
     btnas.addEventListener('click', () => {
         Array.from(selectElement.options).forEach(option => option.selected = true);
-        postSelection(selectElement.options);
+        postSelection();
         displaySelectedOptions();
     });
 
-    // all cancellation when button is clicked
+    // all cancellation and is post when button is clicked
     btnac.addEventListener('click', () => {
         Array.from(selectElement.options).forEach(option => option.selected = false);
-        postSelection(selectElement.options);
+        postSelection();
         displaySelectedOptions();
+    });
+
+    // is posted when button is clicked
+    categoryForm.addEventListener('change', () => {
+        postSelection();
     });
 });
