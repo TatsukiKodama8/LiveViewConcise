@@ -39,11 +39,13 @@
     <form id="categoryForm">
         <% categories.forEach(category => { %>
         <label>
-            <input type="checkbox" name="category-name" value="<%= category %>"/>
+            <input type="checkbox" name="category-name" value="<%= category %>"
+            <%= decryptedCategory.includes(category) ? 'checked' : '' %> />
             <%= category %>
         </label><br>
         <% }); %>
     </form>
+
 
     <%# =========== store names =========== %>
     <%# display selected storename %>
@@ -53,6 +55,7 @@
     <label>
         <input id="buttonAllSelect" type="button" name="select" value="全選択"/>
     </label>
+
     <label>
         <input id="buttonAllCancellation" type="button" name="select" value="全解除"/>
     </label>
@@ -61,7 +64,8 @@
     <form id="storeForm">
         <select id="selectStoreName" name="store-name" multiple size="10">
             <% storeNames.forEach(store => { %>
-                <option value="<%= store %>"><%= store %></option>
+                <option value="<%= store %>" 
+                <%= decryptedStorename.includes(store) ? 'selected' : '' %> ><%= store %></option>
             <% }); %>
         </select>
     </form>

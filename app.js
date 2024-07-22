@@ -59,12 +59,41 @@ app.get('/stationary', (req, res) => {
     if (req.session.user) {
         console.log("Sign-in is successed: ", isSignIn);
         setTimeout(() => { isSignIn = 0 }, TOKEN_RETENTION_TIME); // Token is expired
-        res.render('pages/stationary', { categories, storeNames });
+        
+        const email = req.session.user.email; // obtain mail address from session
+        let userQuery = `SELECT * FROM ${config.tableName} WHERE email = ?`;
+        
+        db.query(userQuery, [email], (err, result) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            
+            if (result.length === 0) {
+                return res.status(404).send("User not found");
+            }
+
+            // check attribute at login
+            let categoryInDb        = result[0].category;
+            let storenameInDb       = result[0].storename;
+            let categoryZeroOneArr  = ArrayUtils.hexToArray(categoryInDb, categories.length);
+            let storenameZeroOneArr = ArrayUtils.hexToArray(storenameInDb, storeNames.length);
+            let decryptedCategory   = ArrayUtils.filterByIndex(categoryZeroOneArr, categories);
+            let decryptedStorename  = ArrayUtils.filterByIndex(storenameZeroOneArr, storeNames);
+            console.log(decryptedCategory);
+            console.log(decryptedStorename);
+            
+            res.render('pages/stationary', { 
+                categories, 
+                storeNames, 
+                decryptedCategory, 
+                decryptedStorename 
+            });
+        });
     } else {
         res.redirect('/');
     }
-
 });
+
 
 app.get('/index', (req, res) => {
     res.render('pages/index');
@@ -83,33 +112,19 @@ app.post('/', async (req, res) => {
         }
         if (result.length == 0)
             return res.status(401).send("<h1>401 Unauthorized</h1>");
-        console.log(result);
+        
         let passwordInDb = result[0].password;
-
-        // checkbox decryption
-        let categoryInDb = result[0].category;
-        let storenameInDb = result[0].storename;
-        //console.log(categoryInDb, storenameInDb);
-        //console.log(categories.length, storeNames.length);
-        let categoryZeroOneArr = ArrayUtils.hexToArray(categoryInDb, categories.length);
-        let storenameZeroOneArr = ArrayUtils.hexToArray(storenameInDb, storeNames.length);
-        //console.log(categoryZeroOneArr);
-        //console.log(storenameZeroOneArr);
-        let decryptedCategory = ArrayUtils.filterByIndex(categoryZeroOneArr, categories);
-        let decryptedStorename = ArrayUtils.filterByIndex(storenameZeroOneArr, storeNames);
-        console.log(decryptedCategory);
-        console.log(decryptedStorename);
-        /*=======*/
 
         if (passwordInDb !== password) {
             res.send("<h1>Password is wrong.</h1>");
             return;
         } else {
             isSignIn = 1;   // for sign-in
-            req.session.user = { email: mailAddress }; // セッションにユーザー情報を保存
+            req.session.user = { email: mailAddress }; // retaion the user data to session 
             console.log("Sign-in is successed: ", isSignIn);
             console.log("Authorized");
             res.redirect('/stationary');
+            
         }
     });
 });
