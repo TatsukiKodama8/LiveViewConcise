@@ -19,7 +19,7 @@ const TOKEN_RETENTION_TIME = 6e4; /* msec */
 let isSignIn = 0;  // Use let or const to avoid global variable issues
 
 /* ========== SETTINGS ========== */
-app.use(express.static(path.join(__dirname, 'views')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -49,7 +49,6 @@ db.connect((err) => {
 });
 
 
-// Stational Display
 app.get('/', (req, res) => {
     res.render('pages/index');
 });

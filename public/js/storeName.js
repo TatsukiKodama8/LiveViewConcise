@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // display selected store name
-    selectElement.addEventListener('mousedown', function (e) {
+    selectElement.addEventListener('mousedown', (e) => {
         e.preventDefault();
         const option = e.target;
         if (option.tagName === 'OPTION') {
@@ -54,7 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // display image
+    selectElement.addEventListener('mousedown',(e) => {
+        
+    } );
+
     // all selection and is post when button is clicked
+    // btnas <= butte all selection
     btnas.addEventListener('click', () => {
         Array.from(selectElement.options).forEach(option => option.selected = true);
         postSelection();
@@ -62,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // all cancellation and is post when button is clicked
+    // btnas <= butte all cancellation
     btnac.addEventListener('click', () => {
         Array.from(selectElement.options).forEach(option => option.selected = false);
         postSelection();
