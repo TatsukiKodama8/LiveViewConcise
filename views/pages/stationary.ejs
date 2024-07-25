@@ -71,6 +71,49 @@
     <%# =========== images =========== %>
     <div id="imageArea"></div>
     
+    <script>
+    document.getElementById('categoryForm').addEventListener('change', function() {
+        const selectedCategories = Array.from(document.querySelectorAll('input[name="category-name"]:checked'))
+            .map(input => input.value);
+        
+        fetch('/updateCategories', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ categories: selectedCategories })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Categories updated successfully');
+            } else {
+                console.error('Failed to update categories');
+            }
+        });
+    });
+    
+    document.getElementById('storeForm').addEventListener('change', function() {
+        const selectedStores = Array.from(document.querySelectorAll('#selectStoreName option:checked'))
+            .map(option => option.value);
+    
+        fetch('/updateStores', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ stores: selectedStores })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Stores updated successfully');
+            } else {
+                console.error('Failed to update stores');
+            }
+        });
+    });
+    </script>
     <script src="js/storeName.js"></script>
 
     <p><a href="index">Exit</a></p>

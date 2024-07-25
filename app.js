@@ -9,6 +9,7 @@ const session = require('express-session');
 const categories = require('./categories');
 const storeNames = require('./storeNames');
 const ArrayUtils = require('./arrayUtils');
+const fs = require('fs')
 const app = express();
 
 /* ========== CONSTANTS ========== */
@@ -59,18 +60,18 @@ const updateUserSelected = (userQuery, email) => {
             if (err) {
                 return reject({ status: 500, message: err.message });
             }
-            
+
             if (result.length === 0) {
                 return reject({ status: 404, message: "User not found" });
             }
 
             // check attribute at login
-            let categoryInDb        = result[0].category;
-            let storenameInDb       = result[0].storename;
-            let categoryZeroOneArr  = ArrayUtils.hexToArray(categoryInDb, categories.length);
+            let categoryInDb = result[0].category;
+            let storenameInDb = result[0].storename;
+            let categoryZeroOneArr = ArrayUtils.hexToArray(categoryInDb, categories.length);
             let storenameZeroOneArr = ArrayUtils.hexToArray(storenameInDb, storeNames.length);
-            let decryptedCategory   = ArrayUtils.filterByIndex(categoryZeroOneArr, categories);
-            let decryptedStorename  = ArrayUtils.filterByIndex(storenameZeroOneArr, storeNames);
+            let decryptedCategory = ArrayUtils.filterByIndex(categoryZeroOneArr, categories);
+            let decryptedStorename = ArrayUtils.filterByIndex(storenameZeroOneArr, storeNames);
 
             resolve({ decryptedCategory, decryptedStorename });
         });
@@ -81,17 +82,17 @@ app.get('/stationary', (req, res) => {
     if (req.session.user) {
         console.log("Sign-in is successed: ", isSignIn);
         setTimeout(() => { isSignIn = 0 }, TOKEN_RETENTION_TIME); // Token is expired
-        
+
         const email = req.session.user.email; // obtain mail address from session
         let userQuery = `SELECT * FROM ${config.tableName} WHERE email = ?`;
-        
+
         updateUserSelected(userQuery, email)
             .then(({ decryptedCategory, decryptedStorename }) => {
-                res.render('pages/stationary', { 
-                    categories, 
-                    storeNames, 
-                    decryptedCategory, 
-                    decryptedStorename 
+                res.render('pages/stationary', {
+                    categories,
+                    storeNames,
+                    decryptedCategory,
+                    decryptedStorename
                 });
             })
             .catch((error) => {
@@ -102,7 +103,55 @@ app.get('/stationary', (req, res) => {
     }
 });
 
+// posted from stationary
+// category name and store name is posted from 
+// postSelection() in storeName.js. Thus, we will e
+// xecute to serch file pathes of images by using that.
+app.post('/updateImage', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).send("<h1>401 Unauthorized</h1>");
+    }
 
+    const selectedStores = req.body.selectedStores;
+    const selectedCategories = req.body.selectedCategories;
+    const email = req.session.user.email; // obtain mail address from session
+
+
+    // ここでサーバ内の条件に合う画像のパスを探査する。
+    // 条件はPOSTされた「店舗名」かつ「カテゴリ」を満たす画像。
+    console.log('a', __dirname + '/img/稲築');
+    console.log('b', __dirname + `/img/${selectedStores[0]}`);
+    try {
+        console.log(fs.readdirSync(__dirname + '/img'))
+        //console.log(fs.readdirSync(__dirname + `/img/${selectedStores[0]}`))
+    } catch (err) {
+        console.log(err)
+    }
+    // 選ばれた画像パスがいくつあるのかを集計
+
+    // 6枚以下と6より大きい場合で場合わけが必要
+    // 6枚以下　=> そのまま表示。並べる必要はあるが、ひとまず要件は満たされる。
+    // 6より大きい => ６枚ずつ送信
+
+    // 10秒ごとに次のセットの画像をレンダー
+
+
+    // hexadecimal
+    let preprocessSelectedStore = ArrayUtils.twoArraysToHex(selectedStores, storeNames);
+    let preprocessSelectedCategory = ArrayUtils.twoArraysToHex(selectedCategories, categories);
+    // for now, retain the data to DB every post
+    let queryUserChecked = `UPDATE ${config.tableName} SET category = ?, storename = ? WHERE email = ?`;
+
+    db.query(queryUserChecked, [preprocessSelectedCategory, preprocessSelectedStore, email], (err, result) => {
+        if (err) {
+            return res.status(500).send('Database update failed');
+        }
+        res.status(200).send('Selection updated');
+    });
+
+});
+
+/* ===================================================================================== */
 
 app.get('/index', (req, res) => {
     res.render('pages/index');
@@ -121,7 +170,7 @@ app.post('/', async (req, res) => {
         }
         if (result.length == 0)
             return res.status(401).send("<h1>401 Unauthorized</h1>");
-        
+
         let passwordInDb = result[0].password;
 
         if (passwordInDb !== password) {
@@ -133,38 +182,12 @@ app.post('/', async (req, res) => {
             console.log("Sign-in is successed: ", isSignIn);
             console.log("Authorized");
             res.redirect('/stationary');
-            
+
         }
     });
 });
 
-// posted from stationary
-app.post('/updateImage', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).send("<h1>401 Unauthorized</h1>");
-    }
 
-    const selectedStores = req.body.selectedStores;
-    const selectedCategories = req.body.selectedCategories;
-    const email = req.session.user.email; // obtain mail address from session
-    console.log('Selected stores:', selectedStores);
-    console.log('Selected categories:', selectedCategories);
-
-    let test1 = ArrayUtils.twoArraysToHex(selectedStores, storeNames);
-    let test2 = ArrayUtils.twoArraysToHex(selectedCategories, categories);
-    console.log("selectedStore", test1);
-    console.log("selectedCategories", test2);
-
-    // for now, retain the data to DB every post
-    let queryUserChecked = `UPDATE ${config.tableName} SET category = ?, storename = ? WHERE email = ?`;
-
-    db.query(queryUserChecked, [test2, test1, email], (err, result) => {
-        if (err) {
-            return res.status(500).send('Database update failed');
-        }
-        res.status(200).send('Selection updated');
-    });
-});
 
 /* ========== LISTEN ========== */
 app.listen(PORT, () => {
