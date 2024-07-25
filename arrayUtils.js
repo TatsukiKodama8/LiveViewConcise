@@ -115,6 +115,6 @@ module.exports = ArrayUtils;
 const hex = '1A'; // hexadecimal
 const paddingOrder = 8; // paddingOrder
 
-// hexToArray関数のテスト
+// test of hexToArray
 const result = ArrayUtils.hexToArray(hex, paddingOrder);
 console.log(result); // [0, 0, 0, 1, 1, 0, 1, 0]

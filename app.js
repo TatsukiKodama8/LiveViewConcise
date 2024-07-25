@@ -48,27 +48,20 @@ db.connect((err) => {
     console.log('Connected to MySQL!');
 });
 
-
 app.get('/', (req, res) => {
     res.render('pages/index');
 });
 
-
-app.get('/stationary', (req, res) => {
-    if (req.session.user) {
-        console.log("Sign-in is successed: ", isSignIn);
-        setTimeout(() => { isSignIn = 0 }, TOKEN_RETENTION_TIME); // Token is expired
-        
-        const email = req.session.user.email; // obtain mail address from session
-        let userQuery = `SELECT * FROM ${config.tableName} WHERE email = ?`;
-        
+// updated category and storename that user selected
+const updateUserSelected = (userQuery, email) => {
+    return new Promise((resolve, reject) => {
         db.query(userQuery, [email], (err, result) => {
             if (err) {
-                return res.status(500).json({ error: err.message });
+                return reject({ status: 500, message: err.message });
             }
             
             if (result.length === 0) {
-                return res.status(404).send("User not found");
+                return reject({ status: 404, message: "User not found" });
             }
 
             // check attribute at login
@@ -78,20 +71,37 @@ app.get('/stationary', (req, res) => {
             let storenameZeroOneArr = ArrayUtils.hexToArray(storenameInDb, storeNames.length);
             let decryptedCategory   = ArrayUtils.filterByIndex(categoryZeroOneArr, categories);
             let decryptedStorename  = ArrayUtils.filterByIndex(storenameZeroOneArr, storeNames);
-            console.log(decryptedCategory);
-            console.log(decryptedStorename);
-            
-            res.render('pages/stationary', { 
-                categories, 
-                storeNames, 
-                decryptedCategory, 
-                decryptedStorename 
-            });
+
+            resolve({ decryptedCategory, decryptedStorename });
         });
+    });
+}
+
+app.get('/stationary', (req, res) => {
+    if (req.session.user) {
+        console.log("Sign-in is successed: ", isSignIn);
+        setTimeout(() => { isSignIn = 0 }, TOKEN_RETENTION_TIME); // Token is expired
+        
+        const email = req.session.user.email; // obtain mail address from session
+        let userQuery = `SELECT * FROM ${config.tableName} WHERE email = ?`;
+        
+        updateUserSelected(userQuery, email)
+            .then(({ decryptedCategory, decryptedStorename }) => {
+                res.render('pages/stationary', { 
+                    categories, 
+                    storeNames, 
+                    decryptedCategory, 
+                    decryptedStorename 
+                });
+            })
+            .catch((error) => {
+                res.status(error.status).send(error.message);
+            });
     } else {
         res.redirect('/');
     }
 });
+
 
 
 app.get('/index', (req, res) => {
