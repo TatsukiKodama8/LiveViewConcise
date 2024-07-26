@@ -116,18 +116,78 @@ app.post('/updateImage', (req, res) => {
     const selectedCategories = req.body.selectedCategories;
     const email = req.session.user.email; // obtain mail address from session
 
+    /************************************************************************* */
+    const objectStoreCategory = (numStore, numCategory) => { 
+        try {
+            // カテゴリに対応する配列を初期化
+            if (!storeNameCategoryObject[selectedStores[numStore]].hasOwnProperty(selectedCategories[numCategory])) {
+                storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]] = [];
+            }
+
+            let dirPath = path.join(__dirname, 'img', selectedStores[numStore], selectedCategories[numCategory]);
+            let files = fs.readdirSync(dirPath);
+
+            // ファイルのパスを追加
+            files.forEach(file => {
+                storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]].push(path.join(dirPath, file));
+            });
+
+            //console.log(storeNameCategoryObject);
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                // ディレクトリが存在しない場合は null を追加
+                storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]].push(null);
+            } else {
+                throw err;
+            }
+        }    
+    }
+
+    const updateUserCheckedForDB = () => {  // TODO: unreuseable
+        // hexadecimal
+        let preprocessSelectedStore = ArrayUtils.twoArraysToHex(selectedStores, storeNames);
+        let preprocessSelectedCategory = ArrayUtils.twoArraysToHex(selectedCategories, categories);
+        // for now, retain the data to DB every post
+        let queryUserChecked = `UPDATE ${config.tableName} SET category = ?, storename = ? WHERE email = ?`;
+
+        db.query(queryUserChecked, [preprocessSelectedCategory, preprocessSelectedStore, email], (err, result) => {
+            if (err) {
+                return res.status(500).send('Database update failed');
+            }
+            res.status(200).send('Selection updated');
+        });
+    }  
+    /************************************************************************* */
+
+    // update checked category and storename
+    updateUserCheckedForDB();
 
     // ここでサーバ内の条件に合う画像のパスを探査する。
     // 条件はPOSTされた「店舗名」かつ「カテゴリ」を満たす画像。
-    console.log('a', __dirname + '/img/稲築');
-    console.log('b', __dirname + `/img/${selectedStores[0]}`);
-    try {
-        console.log(fs.readdirSync(__dirname + '/img'))
-        //console.log(fs.readdirSync(__dirname + `/img/${selectedStores[0]}`))
-    } catch (err) {
-        console.log(err)
+    let storeNameCategoryObject = {}; // オブジェクトを初期化
+
+    // 選択された店舗名にカテゴリを割り当て
+    const updateObjectStoreCategory = () => {
+        for (let numStore=0; numStore<selectedStores.length; numStore++) {
+            storeNameCategoryObject[selectedStores[numStore]] = {};  
+            for (let numCategory=0; numCategory<selectedCategories.length; numCategory++) {
+                objectStoreCategory(numStore, numCategory);
+            }
+        }
     }
-    // 選ばれた画像パスがいくつあるのかを集計
+    updateObjectStoreCategory();
+    console.log(storeNameCategoryObject);   // Done! on 2024/07/26
+
+    // まずはレンダリングする
+    //res.render('images', { storeNameCategoryObject });
+
+    
+    // 各店舗に対して選ばれた画像パスがいくつあるのかを計算する
+    // nullも要素数としてカウントされるので、必ず1以上
+    //let pathNum = storeNameCategoryObject[`${selectedStores[0]}`][`${selectedCategories[0]}`].length;
+
+
+
 
     // 6枚以下と6より大きい場合で場合わけが必要
     // 6枚以下　=> そのまま表示。並べる必要はあるが、ひとまず要件は満たされる。
@@ -135,19 +195,8 @@ app.post('/updateImage', (req, res) => {
 
     // 10秒ごとに次のセットの画像をレンダー
 
-
-    // hexadecimal
-    let preprocessSelectedStore = ArrayUtils.twoArraysToHex(selectedStores, storeNames);
-    let preprocessSelectedCategory = ArrayUtils.twoArraysToHex(selectedCategories, categories);
-    // for now, retain the data to DB every post
-    let queryUserChecked = `UPDATE ${config.tableName} SET category = ?, storename = ? WHERE email = ?`;
-
-    db.query(queryUserChecked, [preprocessSelectedCategory, preprocessSelectedStore, email], (err, result) => {
-        if (err) {
-            return res.status(500).send('Database update failed');
-        }
-        res.status(200).send('Selection updated');
-    });
+    
+    
 
 });
 
