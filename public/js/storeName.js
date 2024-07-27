@@ -36,15 +36,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ selectedStores, selectedCategories })
-        }).then(response => {
+        })
+        .then(response => {
             if (response.ok) {
-                console.log('Selection updated');
+                return response.json(); // JSONに変換
             } else {
-                console.error('Failed to update selection');
+                throw new Error('Failed to update selection');
             }
-        }).catch(error => {
+        })
+        .then(data => {
+            console.log(data); // デバッグ用
+
+            // 例: data['上津役']['精肉'][0] にある画像パスを使って画像を表示
+            const imagePath = data[selectedStores[0]]['精肉'][0];
+            console.log(selectedStores[0]);
+            // 画像を表示するためのimg要素を作成
+            const img = document.createElement('img');
+            img.src = imagePath.startsWith('/img') ? `http://localhost:8000${imagePath}` : imagePath;
+            img.alt = '画像の説明'; // 適切な説明に置き換えてください
+
+            // 画像サイズをJavaScriptで指定
+            img.width = 100; // 幅を100pxに設定
+            img.height = 75; // 高さを75pxに設定（アスペクト比を保つために自動設定も可能）
+
+            // 画像を追加する要素（例えば、divなど）を取得
+            const imageContainer = document.getElementById('image-container'); // 適切なIDに置き換えてください
+            imageContainer.appendChild(img);
+        })
+        .catch(error => {
             console.error('Error:', error);
         });
+        
+        
     }
 
     // post selected store name to server 

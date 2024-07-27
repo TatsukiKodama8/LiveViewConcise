@@ -21,6 +21,7 @@ let isSignIn = 0;  // Use let or const to avoid global variable issues
 
 /* ========== SETTINGS ========== */
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'img')));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -86,13 +87,15 @@ app.get('/stationary', (req, res) => {
         const email = req.session.user.email; // obtain mail address from session
         let userQuery = `SELECT * FROM ${config.tableName} WHERE email = ?`;
 
+        let storeNameCategoryObject = {};
         updateUserSelected(userQuery, email)
             .then(({ decryptedCategory, decryptedStorename }) => {
                 res.render('pages/stationary', {
                     categories,
                     storeNames,
                     decryptedCategory,
-                    decryptedStorename
+                    decryptedStorename, 
+                    storeNameCategoryObject
                 });
             })
             .catch((error) => {
@@ -124,7 +127,7 @@ app.post('/updateImage', (req, res) => {
                 storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]] = [];
             }
 
-            let dirPath = path.join(__dirname, 'img', selectedStores[numStore], selectedCategories[numCategory]);
+            let dirPath = path.join('img', selectedStores[numStore], selectedCategories[numCategory]);
             let files = fs.readdirSync(dirPath);
 
             // ファイルのパスを追加
@@ -154,7 +157,7 @@ app.post('/updateImage', (req, res) => {
             if (err) {
                 return res.status(500).send('Database update failed');
             }
-            res.status(200).send('Selection updated');
+            //res.status(200).send('Selection updated');
         });
     }  
     /************************************************************************* */
@@ -176,10 +179,11 @@ app.post('/updateImage', (req, res) => {
         }
     }
     updateObjectStoreCategory();
-    console.log(storeNameCategoryObject);   // Done! on 2024/07/26
+    //console.log(storeNameCategoryObject);  
+    res.send( JSON.stringify(storeNameCategoryObject) );
 
     // まずはレンダリングする
-    //res.render('images', { storeNameCategoryObject });
+    //return storeNameCategoryObject;
 
     
     // 各店舗に対して選ばれた画像パスがいくつあるのかを計算する
@@ -193,11 +197,7 @@ app.post('/updateImage', (req, res) => {
     // 6枚以下　=> そのまま表示。並べる必要はあるが、ひとまず要件は満たされる。
     // 6より大きい => ６枚ずつ送信
 
-    // 10秒ごとに次のセットの画像をレンダー
-
-    
-    
-
+    // 10秒ごとに次のセットの画像をレンダリング
 });
 
 /* ===================================================================================== */
@@ -231,7 +231,6 @@ app.post('/', async (req, res) => {
             console.log("Sign-in is successed: ", isSignIn);
             console.log("Authorized");
             res.redirect('/stationary');
-
         }
     });
 });
