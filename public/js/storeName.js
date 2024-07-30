@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnas = document.getElementById('buttonAllSelect');
     const btnac = document.getElementById('buttonAllCancellation');
     const categoryForm = document.getElementById('categoryForm');
+    const IMAGE_MAX_NUM = 6;
+    const SEC_TO_MSEC = 1000;
 
     function getSelectedCategories() {
         return Array.from(categoryForm.querySelectorAll('input[name="category-name"]:checked'))
@@ -45,23 +47,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .then(data => {
-            console.log(data); // デバッグ用
 
             // 例: data['上津役']['精肉'][0] にある画像パスを使って画像を表示
-            const imagePath = data[selectedStores[0]]['精肉'][0];
-            console.log(selectedStores[0]);
-            // 画像を表示するためのimg要素を作成
-            const img = document.createElement('img');
-            img.src = imagePath.startsWith('/img') ? `http://localhost:8000${imagePath}` : imagePath;
-            img.alt = '画像の説明'; // 適切な説明に置き換えてください
+            const displayPath = (storeStr, categStr, startNum) => {
+                let maxPathLength = data[storeStr][categStr].length;
+                let upperBound = (maxPathLength < (startNum+IMAGE_MAX_NUM)) ? maxPathLength : (startNum+IMAGE_MAX_NUM);
+                for(let i=startNum; i<upperBound; i++){
+                    const imagePath = data[storeStr][categStr][i];
+    
+                    // 画像を表示するためのimg要素を作成
+                    const img = document.createElement('img');
+                    img.src = imagePath.startsWith('/img') ? `http://localhost:8000${imagePath}` : imagePath;
 
-            // 画像サイズをJavaScriptで指定
-            img.width = 100; // 幅を100pxに設定
-            img.height = 75; // 高さを75pxに設定（アスペクト比を保つために自動設定も可能）
+                    // 画像サイズをJavaScriptで指定
+                    img.width = 200; // 幅を100pxに設定
+                    img.height = 200; // 高さを75pxに設定（アスペクト比を保つために自動設定も可能）
 
+                    imageContainer.appendChild(img);
+                }
+            }
+
+            console.log(data); // デバッグ用
+            
             // 画像を追加する要素（例えば、divなど）を取得
             const imageContainer = document.getElementById('image-container'); // 適切なIDに置き換えてください
-            imageContainer.appendChild(img);
+
+            let i = 0;
+            let pathNum = data[selectedStores[0]][selectedCategories[1]].length;
+            setInterval(() => {
+                    // 子要素の初期化
+                    while(imageContainer.firstChild) {
+                        imageContainer.removeChild(imageContainer.firstChild);
+                    }
+                    displayPath(selectedStores[0], selectedCategories[1], i);
+                    i = i + IMAGE_MAX_NUM;
+                    if (i>pathNum) i=0;
+            }, 1*SEC_TO_MSEC)
+
         })
         .catch(error => {
             console.error('Error:', error);
