@@ -1,3 +1,4 @@
+/* branch fix_display */
 document.addEventListener('DOMContentLoaded', () => {
     const selectElement = document.getElementById('selectStoreName');
     const btnas = document.getElementById('buttonAllSelect');
