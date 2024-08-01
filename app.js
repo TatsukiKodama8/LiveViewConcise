@@ -132,7 +132,8 @@ app.post('/updateImage', (req, res) => {
 
             // ファイルのパスを追加
             files.forEach(file => {
-                storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]].push(path.join(dirPath, file));
+                if (file !== ".DS_Store")
+                    storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]].push(path.join(dirPath, file));
             });
 
             //console.log(storeNameCategoryObject);

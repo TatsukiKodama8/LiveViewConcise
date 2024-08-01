@@ -58,7 +58,7 @@
     <label>
         <input id="buttonAllCancellation" type="button" name="select" value="全解除"/>
     </label>
-    <p id="displayStoreName"></p><%# Selected store names are displayed here. %>
+    <p id="selectedStoreName"></p><%# Selected store names are displayed here. %>
     
     <form id="storeForm">
         <select id="selectStoreName" name="store-name" multiple size="10">
@@ -68,7 +68,11 @@
         </select>
     </form>
     
+
     <%# =========== images =========== %> 
+    <h1>表示中</h1>
+    <p id="displayedStore"></p>
+    <p id="displayedCategory"></p>
     <div id="image-container">
         <!-- ここに画像が追加されます -->
     </div>
