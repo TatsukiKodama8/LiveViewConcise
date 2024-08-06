@@ -1,4 +1,22 @@
 /* branch fix_display */
+
+const initilizeChild = (element) => {
+    while(element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+// @{path}  : image path
+// @{id}    : id got from getElemtnById 
+const displayImage = (path, id) => {
+    const GOLDEN_RATIO = (1 + Math.sqrt(5))/2;
+    const img = document.createElement('img');
+    img.src = path;
+    img.height = 200; 
+    img.width = img.height * GOLDEN_RATIO;
+    id.appendChild(img);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const selectElement = document.getElementById('selectStoreName');
     const btnas = document.getElementById('buttonAllSelect');
@@ -44,77 +62,29 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(response => {
             if (response.ok) {
-                return response.json(); // JSONに変換
+                return response.json();
             } else {
                 throw new Error('Failed to update selection');
             }
         })
         .then(data => {
+            const imageContainer = document.getElementById('image-container');
 
-            // 例: data['上津役']['精肉'][0] にある画像パスを使って画像を表示
-            const displayPath = (storeStr, categStr, startNum) => {
-                let maxPathLength = data[storeStr][categStr].length;
-                let upperBound = (maxPathLength < (startNum+IMAGE_MAX_NUM)) ? maxPathLength : (startNum+IMAGE_MAX_NUM);
-                for(let i=startNum; i<upperBound; i++){
-                    const imgPath = data[storeStr][categStr][i];
-                    const noImgPath = "noimage.png";
+            // 画像の初期化
+            initilizeChild(imageContainer);
 
-                    // 画像を表示するためのimg要素を作成
-                    const img = document.createElement('img');
-                    img.src = (imgPath === null) ? noImgPath : imgPath;
+            // カテゴリ名・店舗名の表示
+            document.getElementById('displayedStore')
+                .textContent = data['store'];
+            document.getElementById('displayedCategory')
+                .textContent = data['category'];
 
-                    // 画像サイズをJavaScriptで指定
-                    img.height = 200; 
-                    img.width = img.height * GOLDEN_RATIO;
-                    
-                    imageContainer.appendChild(img);
-                }
-            }
-
-            const initilizeChild = () => {
-                // 子要素の初期化
-                while(imageContainer.firstChild) {
-                    imageContainer.removeChild(imageContainer.firstChild);
-                }
-            }
-
-            const storeNum = Object.keys(data).length;
-            const categNum = Object.keys(data[selectedStores[0]]).length;
-            function updateDisplay() {
-                initilizeChild();
-                document.getElementById('displayedStore').textContent = selectedStores[i];
-                document.getElementById('displayedCategory').textContent = selectedCategories[j];
-                let pathNum = data[selectedStores[i]][selectedCategories[j]].length;
-                displayPath(selectedStores[i], selectedCategories[j], k);
-                
-                // メインロジック
-                k = k + IMAGE_MAX_NUM;          // 画像を６枚ずつずらす
-                if (k >= pathNum) {             // 用意されているよりkが大きくなれば
-                    k = 0;                      // kを初期化して
-                    j++;                        // 次のカテゴリへ
-                    if (j >= categNum) {        // 選択されたカテゴリよりも大きくなれば
-                        j = 0;                  // jを初期化して
-                        i = (i + 1) % storeNum; // 次の店舗へ
-                    }
-                }
-            }
-
-            clearInterval(globalStopInterval);
-            
-            // 画像を追加する要素（例えば、divなど）を取得
-            const imageContainer = document.getElementById('image-container'); // 適切なIDに置き換えてください
-            let i = 0;
-            let j = 0;
-            let k = 0;
-            console.log("aaa",data[selectedStores[0]]);
-
-
-            globalStopInterval = setInterval(updateDisplay, 0.1 * SEC_TO_MSEC);
-
+            // ここで画像の表示
+            dataArray = data['path'];   // pathの入った配列
+            imgPath = dataArray[0];     // path
+            imgPathNum = dataArray.length;  // 配列の要素数
+            dataArray.forEach((path) => displayImage(path, imageContainer)); // 全部表示
         })
-        .catch(error => {
-            console.error('Error:', error);
-        });
     }
 
     // post selected store name to server 

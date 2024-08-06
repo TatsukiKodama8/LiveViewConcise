@@ -15,6 +15,7 @@ const app = express();
 /* ========== CONSTANTS ========== */
 const PORT = config.port;
 const TOKEN_RETENTION_TIME = 6e4; /* msec */
+const IMAGE_MAX_NUM = 6;
 
 /* =========== GLOBAL VARIABLES ========== */
 let isSignIn = 0;  // Use let or const to avoid global variable issues
@@ -106,10 +107,33 @@ app.get('/stationary', (req, res) => {
     }
 });
 
+
+/* ========== POST FROM updateImage ========== */
 // posted from stationary
 // category name and store name is posted from 
 // postSelection() in storeName.js. Thus, we will e
-// xecute to serch file pathes of images by using that.
+// execute to serch file pathes of images by using that.
+
+// @{path}: 
+// @{errPath}: defauld => null
+// return => array
+const pathIntoArray = (normalPath, errPath = null) => {
+    let arr = [];
+    try{
+        let files = fs.readdirSync(normalPath);
+        files.forEach(file => {
+            arr.push(path.join(normalPath, file));
+        })
+        return arr; 
+    } catch (err) {
+        console.log(err);
+        if (err.code === 'ENOENT') {
+            arr.push(errPath);
+            return arr;
+        }
+    }
+}
+
 app.post('/updateImage', (req, res) => {
     if (!req.session.user) {
         return res.status(401).send("<h1>401 Unauthorized</h1>");
@@ -118,39 +142,12 @@ app.post('/updateImage', (req, res) => {
     const selectedStores = req.body.selectedStores;
     const selectedCategories = req.body.selectedCategories;
     const email = req.session.user.email; // obtain mail address from session
-
-    /************************************************************************* */
-    const objectStoreCategory = (numStore, numCategory) => { 
-        try {
-            // カテゴリに対応する配列を初期化
-            if (!storeNameCategoryObject[selectedStores[numStore]].hasOwnProperty(selectedCategories[numCategory])) {
-                storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]] = [];
-            }
-
-            let dirPath = path.join('img', selectedStores[numStore], selectedCategories[numCategory]);
-            let files = fs.readdirSync(dirPath);
-
-            // ファイルのパスを追加
-            files.forEach(file => {
-                if (file !== ".DS_Store")
-                    storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]].push(path.join(dirPath, file));
-            });
-
-            //console.log(storeNameCategoryObject);
-        } catch (err) {
-            if (err.code === 'ENOENT') {
-                // ディレクトリが存在しない場合は null を追加
-                storeNameCategoryObject[selectedStores[numStore]][selectedCategories[numCategory]].push(null);
-            } else {
-                throw err;
-            }
-        }    
-    }
-
+    
     const updateUserCheckedForDB = () => {  // TODO: unreuseable
         // hexadecimal
         let preprocessSelectedStore = ArrayUtils.twoArraysToHex(selectedStores, storeNames);
         let preprocessSelectedCategory = ArrayUtils.twoArraysToHex(selectedCategories, categories);
+        console.log(preprocessSelectedStore, preprocessSelectedCategory);
         // for now, retain the data to DB every post
         let queryUserChecked = `UPDATE ${config.tableName} SET category = ?, storename = ? WHERE email = ?`;
 
@@ -161,44 +158,44 @@ app.post('/updateImage', (req, res) => {
             //res.status(200).send('Selection updated');
         });
     }  
-    /************************************************************************* */
-
     // update checked category and storename
     updateUserCheckedForDB();
 
-    // ここでサーバ内の条件に合う画像のパスを探査する。
-    // 条件はPOSTされた「店舗名」かつ「カテゴリ」を満たす画像。
-    let storeNameCategoryObject = {}; // オブジェクトを初期化
+    // 画像を選択された画像を選ぶ
 
-    // 選択された店舗名にカテゴリを割り当て
-    const updateObjectStoreCategory = () => {
-        for (let numStore=0; numStore<selectedStores.length; numStore++) {
-            storeNameCategoryObject[selectedStores[numStore]] = {};  
-            for (let numCategory=0; numCategory<selectedCategories.length; numCategory++) {
-                objectStoreCategory(numStore, numCategory);
-            }
-        }
-    }
-    updateObjectStoreCategory();
-    //console.log(storeNameCategoryObject);  
-    res.send( JSON.stringify(storeNameCategoryObject) );
 
-    // まずはレンダリングする
-    //return storeNameCategoryObject;
+    // clearInterval();
 
+    // この部分は部品としてみなせるので、onloadのところでもこの関数は必要になるかも
+    // さらにこの下の部分を関数化して、setInterval()する。
+    // いま表示されているファイルを削除（初期化）
+        // 画像が6以下だと表示する。画像が7以上だとファイルを分けてsend
+        // カテゴリを表示し終わると、次のカテゴリ（カウントアップ）
+        // 店舗を表示し終わると、次の店舗（カウントアップ）
+
+    let dirPath = path.join('img', selectedStores[0], selectedCategories[5]);
     
-    // 各店舗に対して選ばれた画像パスがいくつあるのかを計算する
-    // nullも要素数としてカウントされるので、必ず1以上
-    //let pathNum = storeNameCategoryObject[`${selectedStores[0]}`][`${selectedCategories[0]}`].length;
+    let noImagePath = path.join('img', 'noimage.png');
 
+    let pathArray = pathIntoArray(dirPath, noImagePath);
 
+    let sendObject = {
+        'store': selectedStores[0], 
+        'category': selectedCategories[0], 
+        'path': pathArray
+    }
 
+    console.log('array', pathArray);
 
-    // 6枚以下と6より大きい場合で場合わけが必要
-    // 6枚以下　=> そのまま表示。並べる必要はあるが、ひとまず要件は満たされる。
-    // 6より大きい => ６枚ずつ送信
+    res.send(sendObject);
 
-    // 10秒ごとに次のセットの画像をレンダリング
+    /*setTimeout(5000);
+
+    pathArray = pathIntoArray(noImagePath, noImagePath);
+    sendObject['path'] = pathArray;
+    res.send(sendObject);
+    */
+
 });
 
 /* ===================================================================================== */
