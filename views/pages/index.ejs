@@ -3,8 +3,10 @@
 
 <head>
     <%- include('../partials/head'); %>
-        <link rel="stylesheet" href="css/style.css" type="text/css">
-        <link rel="icon" type="image/x-icon" href="/img/myFavicon.jpg">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="css/style.css" type="text/css">
+    <link rel="stylesheet" href="css/login.css" type="text/css">
+    <link rel="icon" type="image/x-icon" href="/img/myFavicon.jpg">
 </head>
 
 <body>
@@ -12,14 +14,20 @@
     <header>
         <%- include('../partials/header') %>
     </header>
-    <form action="/" method="POST" id="form" class="container">
 
-        <h2>ログインフォーム</h2>
-        <label><b>メールアドレス</b>
+    <%# ========================================================== %>
+
+    <form action="/" method="POST" id="form" class="login-container">
+
+        <h2>
+            サインイン
+        </h2>
+
+        <label><b><i class="fa fa-envelope" aria-hidden="true"></i> メールアドレス</b>
             <input id="mailAddress" type="text" placeholder="メールアドレスを入力" name="mailAddress" required>
         </label>
 
-        <label><b>パスワード</b>
+        <label><b><i class="fa fa-key" aria-hidden="true"></i> パスワード</b>
             <input id="password" type="password" name="password" placeholder="パスワードを入力"><br>
         </label>
 
@@ -27,6 +35,8 @@
 
         <div id="errorMessage" style="color: red; "></div>
     </form>
+    
+    <%# ========================================================== %>
 
     <script src="/js/signIn.js"></script>
     </div>

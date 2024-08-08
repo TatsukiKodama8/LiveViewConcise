@@ -17,8 +17,7 @@ const TOKEN_RETENTION_TIME = 6e4;
 let isSignIn = 0;
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'img')));
-app.use('/img', express.static(path.join(__dirname, 'views/img')));
+app.use(express.static(path.join(__dirname, 'views')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.set('view engine', 'ejs');

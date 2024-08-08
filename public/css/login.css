@@ -1,0 +1,55 @@
+/********************************************************************/
+/*                          Login Form                              */
+/********************************************************************/
+
+/* Add styles to the form container */
+.login-container {
+    position: absolute;
+    margin: 20px;
+    max-width: 400px;
+    padding: 16px;
+    background-color: rgb(255, 255, 255, 0.4);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 5px; 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Full-width input fields */
+input[type=text],
+input[type=password] {
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border: none;
+    border-radius: 5px;
+    background: #f1f1f1;
+}
+
+/* :focusはフォームを選択中にそれを強調表示 */
+input[type=text]:focus,
+input[type=password]:focus {
+    background-color: #ddd;
+    outline: none;
+}
+
+/* Set a style for the submit button */
+.btn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    opacity: 0.9;       /* なにもカーソルがボタンの上にないときは少しだけ透明にする */
+    border-radius: 5px;
+}
+
+.btn:hover {
+    opacity: 1;         /* カーソルがボタン上にある場合には透明度を０にして、通常状態と区別する */
+}
+
+h2 {
+    margin: 0 auto;
+}

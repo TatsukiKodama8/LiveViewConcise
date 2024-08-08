@@ -1,5 +1,5 @@
 const initilizeChild = (element) => {
-    while(element.firstChild) {
+    while (element.firstChild) {
         element.removeChild(element.firstChild);
     }
 }
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryForm = document.getElementById('categoryForm');
     const IMAGE_MAX_NUM = 6;
     const SEC_TO_MSEC = 1000;
-    const GOLDEN_RATIO = (1 + Math.sqrt(5))/2;
+    const GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
     const imageContainer = document.getElementById('image-container'); // 適切なIDに置き換えてください
     let globalStopInterval = 0;
 
@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Selected storenames:', getSelectedStoreName());
         console.log('Selected categories:', getSelectedCategories());
     }
-
 
     /* ========== storename ========== */
 
@@ -61,8 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // 例: data['上津役']['精肉'][0] にある画像パスを使って画像を表示
             const displayPath = (storeStr, categStr, startNum) => {
                 let maxPathLength = data[storeStr][categStr].length;
-                let upperBound = (maxPathLength < (startNum+IMAGE_MAX_NUM)) ? maxPathLength : (startNum+IMAGE_MAX_NUM);
-                for(let i=startNum; i<upperBound; i++){
+                let upperBound = (maxPathLength < (startNum + IMAGE_MAX_NUM)) ? maxPathLength : (startNum + IMAGE_MAX_NUM);
+                for (let i = startNum; i < upperBound; i++) {
                     const imgPath = data[storeStr][categStr][i];
                     const noImgPath = "img/noimage.png";
 
@@ -71,9 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     img.src = (imgPath === null) ? noImgPath : imgPath;
 
                     // 画像サイズをJavaScriptで指定
-                    img.height = 200; 
+                    img.height = 200;
                     img.width = img.height * GOLDEN_RATIO;
-                    
+
                     imageContainer.appendChild(img);
                 }
             }
@@ -86,25 +85,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('displayedCategory').textContent = selectedCategories[j];
                 let pathNum = data[selectedStores[i]][selectedCategories[j]].length;
                 displayPath(selectedStores[i], selectedCategories[j], k);
-                
+
                 // 画像の遷移
-                k = k + IMAGE_MAX_NUM;          // 画像を６枚ずつずらす
-                if (k >= pathNum) {             // 用意されているよりkが大きくなれば
-                    k = 0;                      // kを初期化して
-                    j++;                        // 次のカテゴリへ
-                    if (j >= categNum) {        // 選択されたカテゴリよりも大きくなれば
-                        j = 0;                  // jを初期化して
+                k = k + IMAGE_MAX_NUM; // 画像を６枚ずつずらす
+                if (k >= pathNum) { // 用意されているよりkが大きくなれば
+                    k = 0; // kを初期化して
+                    j++; // 次のカテゴリへ
+                    if (j >= categNum) { // 選択されたカテゴリよりも大きくなれば
+                        j = 0; // jを初期化して
                         i = (i + 1) % storeNum; // 次の店舗へ
                     }
                 }
             }
-            
+
             clearInterval(globalStopInterval);
 
             let i = 0;
             let j = 0;
             let k = 0;
-            globalStopInterval = setInterval(updateDisplay, 1 * SEC_TO_MSEC);
+
+            // 最初に一度表示する
+            updateDisplay();
+            // その後定期的に表示を更新
+            globalStopInterval = setInterval(updateDisplay, 10 * SEC_TO_MSEC);
 
         })
         .catch(error => {
@@ -119,11 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const displayImageDefault = () => {
-            clearInterval(globalStopInterval);
-            initilizeChild(imageContainer);
-            postSelection();
-            displaySelectedOptions();
-            consoleSelected();
+        clearInterval(globalStopInterval);
+        initilizeChild(imageContainer);
+        postSelection();
+        displaySelectedOptions();
+        consoleSelected();
     }
 
     // display selected store name

@@ -1,0 +1,51 @@
+body,
+html {
+    padding: 0 0 0 0;
+    margin: 0 0 0 0;
+    height: 100%;
+    width: 100%;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    font-family: "Tsukushi A Round Gothic","筑紫A丸ゴシック";
+    color: #444444
+}
+
+body {
+    display: grid;
+    grid-template-rows: 1;
+}
+
+header {
+    width: 100%;
+    height: 100px;
+    background-color: #04AA6D; 
+    color: white;
+    display: flex;
+    align-items: center; /* 上下中央に配置 */
+    /* justify-content: center; 水平方向中央に配置（必要に応じて） */
+}
+
+header h1 {
+    margin: 0;
+    text-align: center;
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+header h1::before {
+    content: ''; /* 何も入れない */
+    text-align: center;
+    display: inline-block;
+    width: 50px;    /* 画像の幅 */
+    height: 50px;   /* 画像の高さ */
+    background-image: url(/img/myFavicon.jpg);
+    background-size: contain;
+    vertical-align: middle;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
