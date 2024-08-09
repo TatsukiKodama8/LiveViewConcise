@@ -57,25 +57,45 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             console.log(data);
 
-            // 例: data['上津役']['精肉'][0] にある画像パスを使って画像を表示
-            const displayPath = (storeStr, categStr, startNum) => {
+            function displayPath(storeStr, categStr, startNum) {
                 let maxPathLength = data[storeStr][categStr].length;
                 let upperBound = (maxPathLength < (startNum + IMAGE_MAX_NUM)) ? maxPathLength : (startNum + IMAGE_MAX_NUM);
+            
+                // 画像数に応じたクラスをimageContainerに設定
+                let imageCount = (upperBound % IMAGE_MAX_NUM === 0) ? IMAGE_MAX_NUM : upperBound % IMAGE_MAX_NUM;
+                
+                // imageContainerのクラスを設定
+                imageContainer.className = ''; // 既存のクラスをクリア
+                if (imageCount === 1) {
+                    imageContainer.classList.add('one-image');
+                } else if (imageCount === 2) {
+                    imageContainer.classList.add('two-images');
+                } else if (imageCount === 3) {
+                    imageContainer.classList.add('three-images');
+                } else if (imageCount === 4) {
+                    imageContainer.classList.add('four-images');
+                } else if (imageCount === 5) {
+                    imageContainer.classList.add('five-images');
+                } else if (imageCount === 6) {
+                    imageContainer.classList.add('six-images');
+                }
+            
                 for (let i = startNum; i < upperBound; i++) {
                     const imgPath = data[storeStr][categStr][i];
                     const noImgPath = "img/noimage.png";
-
+            
                     // 画像を表示するためのimg要素を作成
                     const img = document.createElement('img');
                     img.src = (imgPath === null) ? noImgPath : imgPath;
-
+            
                     // 画像サイズをJavaScriptで指定
                     img.height = 200;
                     img.width = img.height * GOLDEN_RATIO;
-
+            
                     imageContainer.appendChild(img);
                 }
             }
+            
 
             const storeNum = Object.keys(data).length;
             const categNum = Object.keys(data[selectedStores[0]]).length;
@@ -107,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 最初に一度表示する
             updateDisplay();
             // その後定期的に表示を更新
-            globalStopInterval = setInterval(updateDisplay, 10 * SEC_TO_MSEC);
+            globalStopInterval = setInterval(updateDisplay, 0.5 * SEC_TO_MSEC);
 
         })
         .catch(error => {

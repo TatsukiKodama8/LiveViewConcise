@@ -5,14 +5,21 @@
     <%- include('../partials/head'); %>
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <link rel="stylesheet" href="css/stationary.css" type="text/css">
-    <link rel="icon" type="image/x-icon" href="/img/myFavicon.jpg">
+    <link rel="icon" type="image/x-icon" href="/img/myFavicon.png">
 </head>
 
 <body>
     <header>
         <%- include('../partials/header') %>
-        <h2 id="displayedStore"></h2><h2>店</h2>
-        <h2 id="displayedCategory"></h2>
+        <div class="header-store">
+            <h2 id="displayedStore"></h2>
+        </div>
+        <div class="header-category">
+            <h2 id="displayedCategory"></h2>
+        </div>
+        <div class="header-exit">
+            <p><a href="index">Exit</a></p>
+        </div>
     </header>
 
 
@@ -48,7 +55,7 @@
 
         <%# =========== Category =========== %>
         <div class="container">
-            <h2>カテゴリ一覧</h2>
+            <h2>商品カテゴリ</h2>
             <form id="categoryForm">
                 <% categories.forEach(category => { %>
                 <label>
@@ -62,7 +69,7 @@
         <%# =========== store names =========== %>
         <%# display selected storename %>
         <div class="container">
-            <h2>店舗一覧</h2>
+            <h2>店舗</h2>
             
             <%# select all or cancell all %>
             <label>
@@ -95,8 +102,6 @@
             <!-- ここに画像が追加されます -->
         </div>
     </main>
-
-    <%- include('../partials/footer'); %>
     
     <script src="js/storeName.js"></script>
 </body>

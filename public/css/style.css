@@ -42,7 +42,7 @@ header h1::before {
     display: inline-block;
     width: 50px;    /* 画像の幅 */
     height: 50px;   /* 画像の高さ */
-    background-image: url(/img/myFavicon.jpg);
+    background-image: url(/img/myFavicon.png);
     background-size: contain;
     vertical-align: middle;
     margin-right: 10px;
